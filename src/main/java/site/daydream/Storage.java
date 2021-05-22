@@ -2,6 +2,8 @@ package site.daydream;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.SortedMap;
+
 import static site.daydream.Util.*;
 
 /**
@@ -12,7 +14,7 @@ import static site.daydream.Util.*;
 public class Storage {
     private final RandomAccessFile file;
     private static final int SUPERBLOCK_SIZE = 4096;
-    private boolean closed = true;
+    private boolean closed;
 
     public Storage(String filename) throws IOException {
         file = new RandomAccessFile(filename, "rw");
@@ -31,13 +33,9 @@ public class Storage {
     public long write(byte[] data) throws IOException {
         long end_addr = file.length();
         file.seek(end_addr);
-        return write(end_addr, data);
-    }
-
-    public long write(long addr, byte[] data) throws IOException {
         file.writeInt(data.length);
         file.write(data);
-        return addr;
+        return end_addr;
     }
 
     public void close() throws IOException {
@@ -65,6 +63,7 @@ public class Storage {
         }
     }
 
+
     private static void test1() throws IOException {
         Storage storage = new Storage("foo.db");
         long addr1 = storage.write(intToByteArray(13));
@@ -83,6 +82,7 @@ public class Storage {
     }
 
     public static void main(String[] args) throws IOException {
-        test2();
+        Storage storage = new Storage("foo.db");
+        System.out.println(storage.getRootAddr());
     }
 }
